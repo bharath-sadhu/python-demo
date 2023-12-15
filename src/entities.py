@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import SCHEMA_NAME, Base
 
+
 class System(Base):
     __tablename__ = "systems"
     __table_args__ = {"schema": SCHEMA_NAME}
@@ -15,7 +16,8 @@ class System(Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
     supreme_commander: Mapped[str] = mapped_column(Text, nullable=False)
     supreme_commander_name: Mapped[str] = mapped_column(Text, nullable=False)
-    date_created:Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+    date_created: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+
 
 class Planet(Base):
     __tablename__ = "planets"

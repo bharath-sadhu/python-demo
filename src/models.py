@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PastDatetime,
 
 from .entities import StationType
 
+
 class System(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
@@ -12,11 +13,14 @@ class System(BaseModel):
     supreme_commander_name: str
     date_created: PastDatetime
 
+
 class CreateSystem(BaseModel):
     name: str
     supreme_commander: EmailStr
+
     class config:
-        strict= True
+        strict = True
+
 
 class CreatePlanet(BaseModel):
     name: str = Field(strict=True)

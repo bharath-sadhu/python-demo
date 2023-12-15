@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from .. import entities, models
 from ..database import get_db
@@ -31,11 +32,16 @@ async def get_planet(planet_id: UUID, db: AsyncSession = Depends(get_db)):
 async def create_planet(
     request: models.CreatePlanet, db: AsyncSession = Depends(get_db)
 ):
+    system = await db.get(entities.System, request.system_id)
+    if system is None:
+        return HTTPException(status_code=400, detail=f"System with id {request.system_id} not found")
     planet = entities.Planet()
     planet.id = uuid4()
     planet.name = request.name
     planet.project_id = request.project_id
     planet.population_millions = request.population_millions
+    planet.system_id = request.system_id
+    planet.system = system
 
     db.add(planet)
     await db.commit()
@@ -47,7 +53,14 @@ async def create_planet(
 async def update_planet(
     planet_id: UUID, request: models.UpdatePlanet, db: AsyncSession = Depends(get_db)
 ):
-    planet = await db.get(entities.Planet, planet_id)
+    stmt = (
+        select(entities.Planet)
+        .options(joinedload(entities.Planet.system, innerjoin=True))
+        .filter(entities.Planet.id == planet_id)
+        .limit(1)
+    )
+    planet = (await db.execute(stmt)).scalar_one_or_none()
+
     if planet is None:
         raise HTTPException(status_code=404, detail="Planet not found")
 
